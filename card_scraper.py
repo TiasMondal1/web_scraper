@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import datetime
 import time
 import os
+import logging
 
 def get_price(url):
     # Headers to mimic a browser request
