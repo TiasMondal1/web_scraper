@@ -6,6 +6,7 @@ import time
 import os
 import json
 from urllib.parse import urlparse
+from price_analysis import PriceAnalyzer # type: ignore
 
 def load_products():
     try:
@@ -133,13 +134,33 @@ def track_all_products():
             print(f"\nTracking {product['name']}...")
             update_price_data(product)
             # Add a small delay between products to avoid rate limiting
-            time.sleep(2)
+            time.sleep(5)
         except Exception as e:
             print(f"Error tracking {product['name']}: {str(e)}")
 
+def run_price_analysis():
+    print("\nGenerating price analysis...")
+    analyzer = PriceAnalyzer()
+    
+    # Get all product names from Excel file
+    excel_file = pd.ExcelFile('price_history.xlsx')
+    product_names = excel_file.sheet_names
+    
+    # Generate analysis for each product
+    for product_name in product_names:
+        print(f"\nAnalyzing {product_name}...")
+        report_path = analyzer.generate_analysis_report(product_name)
+        if report_path:
+            print(f"Analysis report generated: {report_path}")
+
 def main():
     try:
+        # First track prices
         track_all_products()
+        
+        # Then run analysis
+        run_price_analysis()
+        
     except Exception as e:
         print(f'Error message: {str(e)}')
 

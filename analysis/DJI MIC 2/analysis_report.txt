@@ -1,0 +1,25 @@
+
+Product Analysis Report
+----------------------
+Product: DJI MIC 2
+Analysis Period: 2025-05-02 to 2025-05-02
+
+Price Statistics:
+- Average Price: ₹20900.00
+- Minimum Price: ₹20900.00
+- Maximum Price: ₹20900.00
+- Price Standard Deviation: ₹0.00
+- Overall Price Change: 0.00%
+
+Price Trends:
+- Daily Average: ₹20900.00
+- Weekly Average: ₹20900.00
+- Monthly Average: ₹20900.00
+
+Graphs Generated:
+- Price History: price_history.png
+- Price Distribution: price_distribution.png
+
+Recommendations:
+- Wait for better price
+- Price is stable

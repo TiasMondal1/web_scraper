@@ -1,0 +1,25 @@
+
+Product Analysis Report
+----------------------
+Product: Nothing Phone (3a) - 256 GB
+Analysis Period: 2025-05-02 to 2025-05-18
+
+Price Statistics:
+- Average Price: ₹26999.00
+- Minimum Price: ₹26999.00
+- Maximum Price: ₹26999.00
+- Price Standard Deviation: ₹0.00
+- Overall Price Change: 0.00%
+
+Price Trends:
+- Daily Average: ₹26999.00
+- Weekly Average: ₹26999.00
+- Monthly Average: ₹26999.00
+
+Graphs Generated:
+- Price History: price_history.png
+- Price Distribution: price_distribution.png
+
+Recommendations:
+- Wait for better price
+- Price is stable
