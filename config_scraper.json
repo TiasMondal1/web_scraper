@@ -1,0 +1,10 @@
+{
+    "scraper": {
+        "use_selenium": false,
+        "retry_count": 3,
+        "timeout": 30,
+        "proxies": [],
+        "user_agents": []
+    }
+}
+

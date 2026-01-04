@@ -4,10 +4,12 @@ import seaborn as sns
 from datetime import datetime
 import os
 import shutil
+from database import PriceDatabase # type: ignore
 
 class PriceAnalyzer:
-    def __init__(self, excel_file='price_history.xlsx'):
-        self.excel_file = excel_file
+    def __init__(self, db_file='price_history.db'):
+        self.db_file = db_file
+        self.db = PriceDatabase(db_file)
         self.analysis_dir = 'analysis'
         
         # Clean up previous analysis
@@ -29,10 +31,13 @@ class PriceAnalyzer:
         return product_dir
 
     def load_product_data(self, product_name):
-        """Load data for a specific product from Excel file"""
+        """Load data for a specific product from database"""
         try:
-            df = pd.read_excel(self.excel_file, sheet_name=product_name)
-            df['Date'] = pd.to_datetime(df['Date'])
+            df = self.db.get_price_history(product_name)
+            if df.empty:
+                print(f"No price data found for {product_name}")
+                return None
+            # Date is already datetime from database
             return df
         except Exception as e:
             print(f"Error loading data for {product_name}: {str(e)}")
@@ -152,9 +157,12 @@ def main():
     # Example usage
     analyzer = PriceAnalyzer()
     
-    # Get all product names from Excel file
-    excel_file = pd.ExcelFile('price_history.xlsx')
-    product_names = excel_file.sheet_names
+    # Get all product names from database
+    product_names = analyzer.db.get_all_product_names()
+    
+    if not product_names:
+        print("No products found in database.")
+        return
     
     # Generate analysis for each product
     for product_name in product_names:

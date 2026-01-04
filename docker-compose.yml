@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  price-tracker:
+    build: .
+    container_name: price-tracker
+    volumes:
+      - ./price_history.db:/app/price_history.db
+      - ./products.json:/app/products.json
+      - ./logs:/app/logs
+      - ./exports:/app/exports
+      - ./backups:/app/backups
+      - ./analysis:/app/analysis
+    environment:
+      - DB_FILE=price_history.db
+      - LOG_LEVEL=INFO
+    restart: unless-stopped
+    command: python scheduler.py --mode interval --interval 6
+
+  web-dashboard:
+    build: .
+    container_name: price-tracker-dashboard
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./price_history.db:/app/price_history.db
+      - ./products.json:/app/products.json
+      - ./logs:/app/logs
+      - ./analysis:/app/analysis
+    environment:
+      - DB_FILE=price_history.db
+      - WEB_HOST=0.0.0.0
+      - WEB_PORT=5000
+    depends_on:
+      - price-tracker
+    restart: unless-stopped
+    command: python web_dashboard.py
+
+  api:
+    build: .
+    container_name: price-tracker-api
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./price_history.db:/app/price_history.db
+      - ./products.json:/app/products.json
+      - ./logs:/app/logs
+    environment:
+      - DB_FILE=price_history.db
+      - API_HOST=0.0.0.0
+      - API_PORT=5001
+    depends_on:
+      - price-tracker
+    restart: unless-stopped
+    command: python api.py
+
+volumes:
+  db_data:
+  logs_data:
+  exports_data:
+  backups_data:
+

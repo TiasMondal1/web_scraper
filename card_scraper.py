@@ -7,6 +7,9 @@ import os
 import json
 from urllib.parse import urlparse
 from price_analysis import PriceAnalyzer # type: ignore
+from alerts import AlertManager # type: ignore
+from database import PriceDatabase # type: ignore
+from scraper_enhanced import EnhancedScraper # type: ignore
 
 def load_products():
     try:
@@ -75,49 +78,50 @@ def get_price(url):
         print(f"Error occurred: {str(e)}")
         return None
 
-def load_or_create_excel(product_name):
-    filename = 'price_history.xlsx'
-    if os.path.exists(filename):
-        try:
-            # Try to read the existing sheet
-            return pd.read_excel(filename, sheet_name=product_name)
-        except:
-            # If sheet doesn't exist, create new DataFrame
-            return pd.DataFrame(columns=['Date', 'Time', 'Price'])
-    else:
-        return pd.DataFrame(columns=['Date', 'Time', 'Price'])
+# Initialize database (global instance)
+_db = None
 
-def update_price_data(product):
-    # Load existing data or create new DataFrame for this product
-    df = load_or_create_excel(product['name'])
+def get_database():
+    """Get database instance (singleton pattern)"""
+    global _db
+    if _db is None:
+        _db = PriceDatabase()
+    return _db
+
+def update_price_data(product, alert_manager=None, db=None):
+    """Update price data in database"""
+    if db is None:
+        db = get_database()
+    
+    # Ensure product exists in database
+    db.add_product(product['name'], product['url'])
     
     # Get current price
     current_price = get_price(product['url'])
     
     if current_price:
-        # Get current date and time
+        # Get previous price for alert checking
+        previous_price = db.get_latest_price(product['name'])
+        
+        # Add price record to database
+        db.add_price_record(product['name'], current_price)
+        
         now = datetime.now()
-        date = now.strftime('%Y-%m-%d')
-        time = now.strftime('%H:%M:%S')
+        date_str = now.strftime('%Y-%m-%d')
+        time_str = now.strftime('%H:%M:%S')
         
-        # Add new row to DataFrame
-        new_row = pd.DataFrame({
-            'Date': [date],
-            'Time': [time],
-            'Price': [current_price]
-        })
+        print(f"Price updated for {product['name']}: ₹{current_price} at {date_str} {time_str}")
         
-        df = pd.concat([df, new_row], ignore_index=True)
-        
-        # Save to Excel with multiple sheets
-        filename = 'price_history.xlsx'
-        if os.path.exists(filename):
-            with pd.ExcelWriter(filename, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
-                df.to_excel(writer, sheet_name=product['name'], index=False)
-        else:
-            df.to_excel(filename, sheet_name=product['name'], index=False)
-            
-        print(f"Price updated for {product['name']}: ₹{current_price} at {date} {time}")
+        # Check and send alerts if alert manager is provided
+        if alert_manager and previous_price is not None:
+            alert_threshold = product.get('alert_threshold', None)
+            alert_manager.check_and_send_alerts(
+                product['name'], 
+                current_price, 
+                previous_price, 
+                product['url'],
+                alert_threshold
+            )
     else:
         print(f"Failed to get price for {product['name']}")
 
@@ -127,12 +131,15 @@ def track_all_products():
         print("No products found in configuration. Please check products.json")
         return
     
+    # Initialize alert manager
+    alert_manager = AlertManager()
+    
     print("Price tracking started for all products!\n")
     
     for product in products:
         try:
             print(f"\nTracking {product['name']}...")
-            update_price_data(product)
+            update_price_data(product, alert_manager)
             # Add a small delay between products to avoid rate limiting
             time.sleep(5)
         except Exception as e:
@@ -142,9 +149,13 @@ def run_price_analysis():
     print("\nGenerating price analysis...")
     analyzer = PriceAnalyzer()
     
-    # Get all product names from Excel file
-    excel_file = pd.ExcelFile('price_history.xlsx')
-    product_names = excel_file.sheet_names
+    # Get all product names from database
+    db = get_database()
+    product_names = db.get_all_product_names()
+    
+    if not product_names:
+        print("No products found in database.")
+        return
     
     # Generate analysis for each product
     for product_name in product_names:

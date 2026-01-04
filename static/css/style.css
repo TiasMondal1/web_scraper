@@ -1,0 +1,41 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.product-card {
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.price-tag {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.price-change {
+    font-size: 0.9rem;
+}
+
+.price-drop {
+    color: #dc3545;
+}
+
+.price-rise {
+    color: #28a745;
+}
+
+.spinner-border {
+    margin: 20px auto;
+}
+
