@@ -308,3 +308,4 @@ class AdvancedAnalytics:
                 'avg_price': float(np.mean(prices))
             }
 
+

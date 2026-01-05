@@ -115,3 +115,4 @@ class CurrencyConverter:
         symbol = currency_symbols.get(currency, currency)
         return f"{symbol}{amount:,.2f}"
 
+

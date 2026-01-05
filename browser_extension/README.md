@@ -48,3 +48,4 @@ A Chrome/Firefox browser extension for one-click price tracking.
 - The extension communicates with the REST API to add products
 - Product name and URL are extracted from the current page
 
+

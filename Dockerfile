@@ -24,3 +24,4 @@ EXPOSE 5000 5001
 # Default command
 CMD ["python", "card_scraper.py"]
 
+

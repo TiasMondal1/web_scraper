@@ -107,3 +107,4 @@ class DiscountTracker:
             'potential_savings': float(max_price - min_price)
         }
 
+

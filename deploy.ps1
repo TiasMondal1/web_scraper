@@ -36,3 +36,4 @@ Write-Host "Services are running:" -ForegroundColor Cyan
 Write-Host "  Web Dashboard: http://localhost:5000"
 Write-Host "  REST API: http://localhost:5001"
 
+

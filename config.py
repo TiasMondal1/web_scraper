@@ -154,3 +154,4 @@ def get_config() -> Config:
         _config = Config()
     return _config
 
+

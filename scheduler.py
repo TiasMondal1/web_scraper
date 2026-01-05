@@ -95,3 +95,4 @@ if __name__ == "__main__":
             print("Error: --interval required for interval mode")
             sys.exit(1)
 
+

@@ -342,3 +342,4 @@ def get_price_enhanced(url: str, use_selenium: bool = False, proxies: List[Dict]
     finally:
         scraper.close()
 
+

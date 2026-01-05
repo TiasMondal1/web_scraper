@@ -265,3 +265,4 @@ class PriceComparer:
         except Exception as e:
             return {'error': f'Error calculating correlation: {str(e)}'}
 
+
