@@ -12,3 +12,4 @@ You can create simple icons or use icon generators like:
 For now, you can use placeholder icons or create simple ones with any image editing software.
 
 
+

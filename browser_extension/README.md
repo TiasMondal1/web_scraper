@@ -49,3 +49,4 @@ A Chrome/Firefox browser extension for one-click price tracking.
 - Product name and URL are extracted from the current page
 
 
+
