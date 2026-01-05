@@ -63,7 +63,7 @@ class PriceAnalyzer:
         weekly_avg = df.resample('W', on='Date')['Price'].mean()
         
         # Monthly average
-        monthly_avg = df.resample('M', on='Date')['Price'].mean()
+        monthly_avg = df.resample('ME', on='Date')['Price'].mean()
         
         return {
             'daily_avg': daily_avg,
@@ -148,7 +148,7 @@ Recommendations:
 """
         # Save report in product directory
         report_path = os.path.join(product_dir, 'analysis_report.txt')
-        with open(report_path, 'w') as f:
+        with open(report_path, 'w', encoding='utf-8') as f:
             f.write(report)
 
         return report_path

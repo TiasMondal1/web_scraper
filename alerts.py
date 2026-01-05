@@ -50,7 +50,10 @@ class AlertManager:
                     # Merge with defaults
                     for key in default_config:
                         if key in user_config:
-                            default_config[key].update(user_config[key])
+                            if isinstance(default_config[key], dict) and isinstance(user_config[key], dict):
+                                default_config[key].update(user_config[key])
+                            else:
+                                default_config[key] = user_config[key]
                     return default_config
             except Exception as e:
                 print(f"Error loading alert config: {e}. Using defaults.")

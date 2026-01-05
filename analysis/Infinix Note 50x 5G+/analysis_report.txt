@@ -2,19 +2,19 @@
 Product Analysis Report
 ----------------------
 Product: Infinix Note 50x 5G+
-Analysis Period: 2025-05-02 to 2025-05-18
+Analysis Period: 2026-01-06 to 2026-01-06
 
 Price Statistics:
-- Average Price: ₹11499.00
-- Minimum Price: ₹11499.00
-- Maximum Price: ₹11499.00
-- Price Standard Deviation: ₹0.00
+- Average Price: ₹1500.00
+- Minimum Price: ₹1500.00
+- Maximum Price: ₹1500.00
+- Price Standard Deviation: ₹nan
 - Overall Price Change: 0.00%
 
 Price Trends:
-- Daily Average: ₹11499.00
-- Weekly Average: ₹11499.00
-- Monthly Average: ₹11499.00
+- Daily Average: ₹1500.00
+- Weekly Average: ₹1500.00
+- Monthly Average: ₹1500.00
 
 Graphs Generated:
 - Price History: price_history.png
@@ -22,4 +22,4 @@ Graphs Generated:
 
 Recommendations:
 - Wait for better price
-- Price is stable
+- Price is volatile

@@ -45,18 +45,106 @@ def get_price(url):
                     return float(price)
             elif 'flipkart' in url.lower():
                 # Try different possible class names for Flipkart price
-                price_element = soup.find('div', {'class': '_30jeq3 _16Jk6d'})
+                price_selectors = [
+                    {'tag': 'div', 'class': '_30jeq3 _16Jk6d'},
+                    {'tag': 'div', 'class': '_30jeq3'},
+                    {'tag': 'div', 'class': '_16Jk6d'},
+                    {'tag': 'div', 'class': 'Nx9bqj CxhGGd'},
+                    {'tag': 'div', 'class': 'Nx9bqj'},
+                    {'tag': 'span', 'class': '_30jeq3'},
+                    {'tag': 'div', 'class': 'aMaAEs'},
+                    {'tag': 'div', 'class': '_25b18c'},
+                ]
+                
+                price_element = None
+                for selector in price_selectors:
+                    if 'class' in selector:
+                        # Try exact class match first
+                        price_element = soup.find(selector['tag'], {'class': selector['class']})
+                        if not price_element and ' ' in selector['class']:
+                            # Try with class split (for multiple classes)
+                            classes = selector['class'].split()
+                            price_element = soup.find(selector['tag'], class_=lambda x: x and all(c in x for c in classes))
+                    if price_element:
+                        break
+                
+                # If still not found, try searching by text pattern and JSON data
                 if not price_element:
-                    price_element = soup.find('div', {'class': '_30jeq3'})
-                if not price_element:
-                    price_element = soup.find('div', {'class': '_16Jk6d'})
-                if not price_element:
-                    price_element = soup.find('div', {'class': 'Nx9bqj CxhGGd'})
-                if not price_element:
-                    price_element = soup.find('div', {'class': 'Nx9bqj'})
+                    import re
+                    import json
+                    
+                    # Method 1: Look in JSON data FIRST (more reliable for Flipkart)
+                    # Prioritize finalPrice as it's usually the main product price
+                    # Note: JSON numbers can be with or without quotes
+                    json_price_patterns = [
+                        (r'"finalPrice"\s*:\s*(\d+(?:,\d+)*)', True),  # Priority pattern, no quotes for number
+                        (r'"finalPrice"\s*:\s*"?(\d+(?:,\d+)*)"?', True),  # Fallback with optional quotes
+                        (r'"sellingPrice"\s*:\s*(\d+(?:,\d+)*)', True),
+                    ]
+                    
+                    # Check priority patterns first
+                    for pattern, is_priority in json_price_patterns:
+                        matches = re.findall(pattern, response.text, re.IGNORECASE)
+                        if matches:
+                            # Take the first match (usually the main product price)
+                            price_text = matches[0].replace(',', '').strip()
+                            try:
+                                price_val = float(price_text)
+                                if 1000 < price_val < 10000000:
+                                    return price_val
+                            except ValueError:
+                                continue
+                    
+                    # Method 2: Look for price patterns in the HTML (fallback)
+                    price_pattern = r'₹[\d,]+'
+                    matches = re.findall(price_pattern, response.text)
+                    if matches:
+                        # Filter for reasonable prices (likely product prices)
+                        # Take the highest reasonable price found
+                        found_prices = []
+                        for match in matches[:20]:  # Check first 20 matches
+                            price_text = match.replace('₹', '').replace(',', '').strip()
+                            try:
+                                price_val = float(price_text)
+                                # Validate it's a reasonable price (between 1000 and 10 million for phones/electronics)
+                                if 1000 < price_val < 10000000:
+                                    found_prices.append(price_val)
+                            except ValueError:
+                                continue
+                        if found_prices:
+                            # Return the highest price (likely the main product price)
+                            return max(found_prices)
+                    
+                    # Also check script tags with JSON
+                    scripts = soup.find_all('script', type='application/json')
+                    for script in scripts:
+                        try:
+                            data = json.loads(script.string)
+                            json_str = json.dumps(data)
+                            # Look for price in JSON structure
+                            price_matches = re.findall(r'"price"\s*:\s*"?(\d+(?:,\d+)*)"?', json_str, re.IGNORECASE)
+                            if price_matches:
+                                for price_match in price_matches:
+                                    price_text = price_match.replace(',', '').strip()
+                                    try:
+                                        price_val = float(price_text)
+                                        if 1000 < price_val < 10000000:
+                                            return price_val
+                                    except ValueError:
+                                        continue
+                        except:
+                            continue
+                    
+                    # Method 3: Look for price in data attributes or meta tags
+                    meta_price = soup.find('meta', property='product:price:amount')
+                    if meta_price and meta_price.get('content'):
+                        try:
+                            return float(meta_price.get('content'))
+                        except:
+                            pass
                 
                 if price_element:
-                    price_text = price_element.text
+                    price_text = price_element.get_text()
                     # Remove currency symbol and commas
                     price = price_text.replace('₹', '').replace(',', '').strip()
                     try:
@@ -65,9 +153,8 @@ def get_price(url):
                         print(f"Could not convert price '{price_text}' to number")
                         return None
                 else:
-                    print("Could not find price element on Flipkart page")
-                    # Print the page content for debugging
-                    print("Page content preview:", response.text[:500])
+                    print("Could not find price element on Flipkart page. The page structure may have changed.")
+                    print("Tip: Try using the enhanced scraper with Selenium for JavaScript-heavy sites.")
                     return None
             
             return None

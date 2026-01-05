@@ -1,20 +1,20 @@
 
 Product Analysis Report
 ----------------------
-Product: Nothing Phone (3a) - 256 GB
+Product: Google Pixel 10 Obsidian 256 GB
 Analysis Period: 2026-01-06 to 2026-01-06
 
 Price Statistics:
-- Average Price: ₹3000.00
-- Minimum Price: ₹3000.00
-- Maximum Price: ₹3000.00
+- Average Price: ₹4996.00
+- Minimum Price: ₹4996.00
+- Maximum Price: ₹4996.00
 - Price Standard Deviation: ₹nan
 - Overall Price Change: 0.00%
 
 Price Trends:
-- Daily Average: ₹3000.00
-- Weekly Average: ₹3000.00
-- Monthly Average: ₹3000.00
+- Daily Average: ₹4996.00
+- Weekly Average: ₹4996.00
+- Monthly Average: ₹4996.00
 
 Graphs Generated:
 - Price History: price_history.png
