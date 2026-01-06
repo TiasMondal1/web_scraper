@@ -234,19 +234,25 @@ class PriceDatabase:
     
     def get_statistics(self, product_name: str) -> Dict:
         """Get price statistics for a product"""
+        import math
         df = self.get_price_history(product_name)
         
         if df.empty:
             return {}
         
+        std_price = df['Price'].std()
+        # Handle NaN for single price point (std is NaN when there's only one value)
+        if math.isnan(std_price):
+            std_price = 0.0
+        
         return {
             'count': len(df),
-            'min_price': df['Price'].min(),
-            'max_price': df['Price'].max(),
-            'avg_price': df['Price'].mean(),
-            'std_price': df['Price'].std(),
-            'first_price': df['Price'].iloc[0],
-            'last_price': df['Price'].iloc[-1],
+            'min_price': float(df['Price'].min()),
+            'max_price': float(df['Price'].max()),
+            'avg_price': float(df['Price'].mean()),
+            'std_price': float(std_price),
+            'first_price': float(df['Price'].iloc[0]),
+            'last_price': float(df['Price'].iloc[-1]),
             'first_date': df['Date'].min(),
             'last_date': df['Date'].max()
         }
