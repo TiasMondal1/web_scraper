@@ -152,3 +152,118 @@ def get_platform_from_url(url: str) -> str:
     else:
         return 'unknown'
 
+
+def scrape_product_price(url: str) -> Dict[str, Any]:
+    """
+    Synchronous version for Celery tasks
+    Scrape product price and basic info
+    """
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9'
+    }
+    
+    parsed_url = urlparse(url)
+    domain = parsed_url.netloc.lower()
+    
+    try:
+        if 'amazon' in domain:
+            return _scrape_amazon_sync(url, headers)
+        elif 'flipkart' in domain:
+            return _scrape_flipkart_sync(url, headers)
+        else:
+            return {'error': f'Unsupported platform: {domain}'}
+    except Exception as e:
+        return {'error': str(e)}
+
+
+def _scrape_amazon_sync(url: str, headers: Dict) -> Dict[str, Any]:
+    """Synchronous Amazon scraper"""
+    response = requests.get(url, headers=headers, timeout=10)
+    response.raise_for_status()
+    
+    soup = BeautifulSoup(response.text, 'html.parser')
+    
+    # Extract price
+    price = None
+    price_element = soup.find('span', {'class': 'a-price-whole'})
+    if price_element:
+        price_text = price_element.text.replace(',', '').replace('₹', '').strip()
+        try:
+            price = float(price_text)
+        except:
+            pass
+    
+    # Check availability
+    availability_element = soup.find('div', {'id': 'availability'})
+    in_stock = True
+    if availability_element and 'unavailable' in availability_element.text.lower():
+        in_stock = False
+    
+    # Extract discount if available
+    discount_percent = None
+    discount_element = soup.find('span', {'class': 'a-size-large a-color-price savingPrice'})
+    if discount_element:
+        discount_text = discount_element.text
+        # Extract percentage from text like "Save 10%"
+        import re
+        match = re.search(r'(\d+)%', discount_text)
+        if match:
+            discount_percent = float(match.group(1))
+    
+    return {
+        'price': price,
+        'currency': 'INR',
+        'in_stock': in_stock,
+        'discount_percent': discount_percent
+    }
+
+
+def _scrape_flipkart_sync(url: str, headers: Dict) -> Dict[str, Any]:
+    """Synchronous Flipkart scraper"""
+    response = requests.get(url, headers=headers, timeout=10)
+    response.raise_for_status()
+    
+    soup = BeautifulSoup(response.text, 'html.parser')
+    
+    # Extract price
+    price = None
+    price_selectors = [
+        {'class': 'Nx9bqj CxhGGd'},
+        {'class': '_30jeq3 _16Jk6d'},
+        {'class': '_30jeq3'},
+        {'class': 'Nx9bqj'}
+    ]
+    
+    for selector in price_selectors:
+        price_element = soup.find('div', selector)
+        if price_element:
+            price_text = price_element.text.replace('₹', '').replace(',', '').strip()
+            try:
+                price = float(price_text)
+                break
+            except:
+                pass
+    
+    # Check availability
+    in_stock = True
+    out_of_stock_element = soup.find('div', text=lambda t: t and 'out of stock' in t.lower())
+    if out_of_stock_element:
+        in_stock = False
+    
+    # Extract discount if available
+    discount_percent = None
+    discount_element = soup.find('div', {'class': '_3Ay6Sb'})
+    if discount_element:
+        discount_text = discount_element.text
+        import re
+        match = re.search(r'(\d+)%', discount_text)
+        if match:
+            discount_percent = float(match.group(1))
+    
+    return {
+        'price': price,
+        'currency': 'INR',
+        'in_stock': in_stock,
+        'discount_percent': discount_percent
+    }

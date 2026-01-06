@@ -17,13 +17,16 @@ from app.auth import (
     get_password_hash, authenticate_user, create_user_tokens,
     get_current_user, generate_verification_token, decode_token
 )
-from app.routers import products, subscriptions, dashboard, payments
+from app.routers import products, subscriptions, dashboard, payments, admin, exports
 
 # Initialize FastAPI app
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
-    description="SaaS Price Tracking Application - Track prices, get alerts, save money!"
+    description="SaaS Price Tracking Application - Track prices, get alerts, save money!",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json"
 )
 
 # Include routers
@@ -31,6 +34,15 @@ app.include_router(products.router)
 app.include_router(subscriptions.router)
 app.include_router(dashboard.router)
 app.include_router(payments.router)
+app.include_router(admin.router)
+app.include_router(exports.router)
+
+# Add custom middleware
+from app.middleware import RateLimitMiddleware, LoggingMiddleware, SecurityHeadersMiddleware
+
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(LoggingMiddleware)
+app.add_middleware(RateLimitMiddleware, requests_per_minute=settings.RATE_LIMIT_PER_MINUTE)
 
 # Add CORS middleware
 app.add_middleware(
@@ -176,8 +188,16 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     
-    # TODO: Send verification email
-    # send_verification_email(new_user.email, verification_token)
+    # Send verification and welcome emails
+    try:
+        from app.utils.email import send_verification_email, send_welcome_email
+        send_verification_email(new_user.email, verification_token)
+        send_welcome_email(new_user.email, new_user.full_name or new_user.email)
+    except Exception as e:
+        # Log error but don't fail registration
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Failed to send welcome email: {str(e)}")
     
     # Create tokens
     tokens = create_user_tokens(new_user.id)

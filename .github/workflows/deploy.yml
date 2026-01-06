@@ -1,0 +1,59 @@
+name: Manual Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      run_migrations:
+        description: 'Run database migrations'
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  deploy:
+    name: Deploy to ${{ github.event.inputs.environment }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment }}
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install deployment tools
+        run: |
+          pip install ansible
+          # or: npm install -g railway
+      
+      - name: Deploy application
+        run: |
+          echo "Deploying to ${{ github.event.inputs.environment }}..."
+          # Add your deployment commands here
+      
+      - name: Run database migrations
+        if: github.event.inputs.run_migrations == 'true'
+        run: |
+          echo "Running database migrations..."
+          # alembic upgrade head
+      
+      - name: Health check
+        run: |
+          echo "Checking application health..."
+          sleep 30
+          curl -f https://${{ github.event.inputs.environment }}.your-domain.com/health || exit 1
+      
+      - name: Notify success
+        if: success()
+        run: |
+          echo "Deployment successful!"

@@ -63,17 +63,24 @@ async def get_dashboard_stats(
         Subscription.status == "active"
     ).first()
     
-    plan = db.query(SubscriptionPlan).filter(
-        SubscriptionPlan.id == subscription.plan_id
-    ).first()
+    if subscription:
+        plan = db.query(SubscriptionPlan).filter(
+            SubscriptionPlan.id == subscription.plan_id
+        ).first()
+        plan_name = plan.display_name if plan else "Free"
+        expires = subscription.current_period_end
+    else:
+        # Default to free plan if no subscription
+        plan_name = "Free"
+        expires = datetime.utcnow() + timedelta(days=365)
     
     return DashboardStatsResponse(
         total_products=total_products,
         active_alerts=active_alerts,
         price_drops_today=price_drops_today,
         savings_this_month=total_savings,
-        subscription_plan=plan.display_name,
-        subscription_expires=subscription.current_period_end
+        subscription_plan=plan_name,
+        subscription_expires=expires
     )
 
 
