@@ -3,7 +3,7 @@ Database Module for Price Tracking
 Uses SQLite for storing price history data
 """
 import sqlite3
-import pandas as pd
+import pandas as pd  # type: ignore
 from datetime import datetime
 import os
 from typing import Optional, List, Dict
