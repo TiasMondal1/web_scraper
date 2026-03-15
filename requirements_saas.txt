@@ -51,9 +51,6 @@ slowapi==0.1.9
 # Monitoring & Logging
 sentry-sdk[fastapi]==1.39.2
 
-# CORS
-python-cors==1.0.0
-
 # Environment variables
 python-dotenv==1.0.0
 
