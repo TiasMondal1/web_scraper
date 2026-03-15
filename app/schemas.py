@@ -243,3 +243,4 @@ class ErrorResponse(BaseModel):
 class ValidationErrorResponse(BaseModel):
     detail: List[dict]
 
+

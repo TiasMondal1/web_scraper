@@ -308,3 +308,4 @@ async def get_price_history(
         avg_price=sum(prices) / len(prices)
     )
 
+

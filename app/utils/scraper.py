@@ -267,3 +267,4 @@ def _scrape_flipkart_sync(url: str, headers: Dict) -> Dict[str, Any]:
         'in_stock': in_stock,
         'discount_percent': discount_percent
     }
+

@@ -124,3 +124,4 @@ def get_usage_stats(db: Session, user_id: int) -> dict:
         'api_calls_limit_per_day': plan.max_api_calls_per_day
     }
 
+

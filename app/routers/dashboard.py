@@ -199,3 +199,4 @@ async def get_top_deals(
     
     return {"top_deals": deals}
 
+
